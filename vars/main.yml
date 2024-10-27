@@ -1,0 +1,3 @@
+---
+
+docker_project_name: "{{ tt_rss_project_name }}"

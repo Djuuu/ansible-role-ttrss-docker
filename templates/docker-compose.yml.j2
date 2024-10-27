@@ -1,0 +1,157 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# {{ ansible_managed }}
+# {{ template_fullpath }}
+
+name: {{ docker_project_slug }}
+
+services:
+
+  {% if tt_rss_db_host == 'db' %}
+  db:
+    image: postgres:{{ tt_rss_postgres_version }}
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${TTRSS_DB_USER}
+      - POSTGRES_PASSWORD=${TTRSS_DB_PASS}
+      - POSTGRES_DB=${TTRSS_DB_NAME}
+    volumes:
+      - db:/var/lib/postgresql/data
+  {% else %}
+  #db:
+  #  image: postgres:{{ tt_rss_postgres_version }}
+  #  restart: unless-stopped
+  #  env_file:
+  #    - .env
+  #  environment:
+  #    - POSTGRES_USER=${TTRSS_DB_USER}
+  #    - POSTGRES_PASSWORD=${TTRSS_DB_PASS}
+  #    - POSTGRES_DB=${TTRSS_DB_NAME}
+  #  volumes:
+  #    - db:/var/lib/postgresql/data
+  {% endif %}
+
+  app:
+    container_name: {{ docker_project_slug }}
+    image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
+    restart: unless-stopped
+    {{ docker_project_compose_service_additional_options | indent(4) }}
+    env_file:
+      - .env
+    volumes:
+      - app:/var/www/html
+      - ./config.d:/opt/tt-rss/config.d:ro
+    {% if tt_rss_db_host == 'db' %}
+    depends_on:
+      - db
+    {% else %}
+    #depends_on:
+    #  - db
+    {% endif %}
+    networks:
+      - default
+      {% if tt_rss_db_network %}
+      - {{ tt_rss_db_network }}
+      {% endif %}
+
+  # optional, makes weekly backups of your install
+  {% if tt_rss_backups %}
+  backups:
+    container_name: {{ docker_project_slug }}-backups
+    image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
+    command: /opt/tt-rss/dcron.sh -f
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - backups:/backups
+      - app:/var/www/html
+    {% if tt_rss_db_host == 'db' %}
+    depends_on:
+      - db
+    {% else %}
+    #depends_on:
+    #  - db
+    {% endif %}
+    networks:
+      - default
+      {% if tt_rss_db_network %}
+      - {{ tt_rss_db_network }}
+      {% endif %}
+  {% else %}
+  #backups:
+  #  container_name: {{ docker_project_slug }}-backups
+  #  image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
+  #  command: /opt/tt-rss/dcron.sh -f
+  #  restart: unless-stopped
+  #  env_file:
+  #    - .env
+  #  volumes:
+  #    - backups:/backups
+  #    - app:/var/www/html
+     {% if tt_rss_db_host == 'db' %}
+  #  depends_on:
+  #    - db
+     {% else %}
+  #  #depends_on:
+  #  #  - db
+     {% endif %}
+  #  networks:
+  #    - default
+       {% if tt_rss_db_network %}
+  #    - {{ tt_rss_db_network }}
+       {% endif %}
+  {% endif %}
+
+  updater:
+    container_name: {{ docker_project_slug }}-updater
+    image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
+    command: /opt/tt-rss/updater.sh
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - app:/var/www/html
+      - ./config.d:/opt/tt-rss/config.d:ro
+    depends_on:
+      - app
+    networks:
+      - default
+      {% if tt_rss_db_network %}
+      - {{ tt_rss_db_network }}
+      {% endif %}
+
+  web-nginx:
+    container_name: {{ docker_project_slug }}-nginx
+    image: cthulhoo/ttrss-web-nginx:{{ tt_rss_nginx_version }}
+    restart: unless-stopped
+    env_file:
+      - .env
+    {% if tt_rss_http_port %}
+    ports:
+      - ${HTTP_PORT}:80
+    {% else %}
+    #ports:
+    #  - ${HTTP_PORT}:80
+    {% endif %}
+    volumes:
+      - app:/var/www/html:ro
+    depends_on:
+      - app
+    labels:
+      {{ traefik_project_base_labels | indent(6) }}
+
+volumes:
+  db:
+  app:
+  backups:
+
+{% if tt_rss_db_network %}
+networks:
+  {{ docker_project_default_network | indent(2) }}
+  {{ tt_rss_db_network }}:
+    external: true
+{% endif %}
+
+{{ docker_project_compose_additional_options }}
