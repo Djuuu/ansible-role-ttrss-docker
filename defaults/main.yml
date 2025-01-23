@@ -45,5 +45,11 @@ tt_rss_self_url_path: https://example.com/tt-rss
 # Leave empty to disable container port binding
 tt_rss_http_port: 127.0.0.1:8280
 
+# Additional settings
+tt_rss_plugins:                 auth_internal # comma-separated
+tt_rss_single_user_mode:        false
+tt_rss_session_cookie_lifetime: 86400 # 24h
+tt_rss_force_article_purge:     0
+
 # Optional, makes weekly backups of your install
 tt_rss_backups: true

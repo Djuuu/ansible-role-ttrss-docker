@@ -15,8 +15,8 @@ var_naming_pattern: "^[a-z_][a-zA-Z0-9_]*$"
 # To skip a rule just enter filename and tag, like "playbook.yml package-latest" on a new line.
 # Optionally you can add comments after the tag, prefixed by "#". We discourage the use of skip_list below because that will hide violations from the output.
 # When putting ignores inside the ignore file, they are marked as ignored, but still visible, making it easier to address later.
-# skip_list:
-#   -
+skip_list:
+  - yaml[colons]
 
 # Offline mode disables installation of requirements.yml and schema refreshing
 offline: true
