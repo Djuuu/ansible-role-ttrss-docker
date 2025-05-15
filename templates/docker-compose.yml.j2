@@ -9,7 +9,7 @@ services:
   {% if tt_rss_db_host == 'db' %}
   db:
     image: postgres:{{ tt_rss_postgres_version }}
-    restart: unless-stopped
+    restart: {{ docker_project_restart }}
     env_file:
       - .env
     environment:
@@ -21,7 +21,7 @@ services:
   {% else %}
   #db:
   #  image: postgres:{{ tt_rss_postgres_version }}
-  #  restart: unless-stopped
+  #  restart: {{ docker_project_restart }}
   #  env_file:
   #    - .env
   #  environment:
@@ -33,10 +33,10 @@ services:
   {% endif %}
 
   app:
-    container_name: {{ docker_project_slug }}
     image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
-    restart: unless-stopped
-    {{ docker_project_compose_service_additional_options | indent(4) }}
+    container_name: {{ docker_project_slug }}
+    restart: {{ docker_project_restart }}
+    {{ docker_project_service_additional_options | indent(4) }}
     env_file:
       - .env
     volumes:
@@ -58,10 +58,10 @@ services:
   # optional, makes weekly backups of your install
   {% if tt_rss_backups %}
   backups:
-    container_name: {{ docker_project_slug }}-backups
     image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
     command: /opt/tt-rss/dcron.sh -f
-    restart: unless-stopped
+    container_name: {{ docker_project_slug }}-backups
+    restart: {{ docker_project_restart }}
     env_file:
       - .env
     volumes:
@@ -84,7 +84,7 @@ services:
   #  container_name: {{ docker_project_slug }}-backups
   #  image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
   #  command: /opt/tt-rss/dcron.sh -f
-  #  restart: unless-stopped
+  #  restart: {{ docker_project_restart }}
   #  env_file:
   #    - .env
   #  volumes:
@@ -105,10 +105,10 @@ services:
   {% endif %}
 
   updater:
-    container_name: {{ docker_project_slug }}-updater
     image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
     command: /opt/tt-rss/updater.sh
-    restart: unless-stopped
+    container_name: {{ docker_project_slug }}-updater
+    restart: {{ docker_project_restart }}
     env_file:
       - .env
     volumes:
@@ -123,9 +123,9 @@ services:
       {% endif %}
 
   web-nginx:
-    container_name: {{ docker_project_slug }}-nginx
     image: cthulhoo/ttrss-web-nginx:{{ tt_rss_nginx_version }}
-    restart: unless-stopped
+    container_name: {{ docker_project_slug }}-nginx
+    restart: {{ docker_project_restart }}
     env_file:
       - .env
     {% if tt_rss_http_port %}
