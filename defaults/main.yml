@@ -8,6 +8,17 @@ tt_rss_traefik_entrypoints: 'http,https'
 tt_rss_traefik_middlewares:
   - "https-redirect@file"
 
+# TT-RSS app service additional docker-compose labels (ex: wud.tag.include, ...)
+tt_rss_app_service_additional_labels: ""
+# TT-RSS db service additional docker-compose labels (ex: wud.tag.include, ...)
+tt_rss_db_service_additional_labels: ""
+# TT-RSS backups service additional docker-compose labels (ex: wud.tag.include, ...)
+tt_rss_backups_service_additional_labels: ""
+# TT-RSS updater service additional docker-compose labels (ex: wud.tag.include, ...)
+tt_rss_updater_service_additional_labels: ""
+# TT-RSS web service additional docker-compose labels (ex: wud.tag.include, ...)
+tt_rss_web_service_additional_labels: ""
+
 
 # TT-RSS project variables
 
