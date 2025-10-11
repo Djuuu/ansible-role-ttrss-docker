@@ -7,7 +7,7 @@ name: {{ docker_project_slug }}
 services:
 
   app:
-    image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
+    image: {{ tt_rss_app_image }}:{{ tt_rss_version }}
     container_name: {{ docker_project_slug }}
     restart: {{ docker_project_restart }}
     {{ docker_project_service_additional_options | indent(4) }}
@@ -34,7 +34,7 @@ services:
     {% endif %}
 
   web-nginx:
-    image: cthulhoo/ttrss-web-nginx:{{ tt_rss_nginx_version }}
+    image: {{ tt_rss_nginx_image }}:{{ tt_rss_nginx_version }}
     container_name: {{ docker_project_slug }}-nginx
     restart: {{ docker_project_restart }}
     env_file:
@@ -55,7 +55,7 @@ services:
       {{ tt_rss_web_service_additional_labels | indent(6) }}
 
   updater:
-    image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
+    image: {{ tt_rss_app_image }}:{{ tt_rss_version }}
     command: /opt/tt-rss/updater.sh
     container_name: {{ docker_project_slug }}-updater
     restart: {{ docker_project_restart }}
@@ -87,7 +87,7 @@ services:
       - POSTGRES_PASSWORD=${TTRSS_DB_PASS}
       - POSTGRES_DB=${TTRSS_DB_NAME}
     volumes:
-      - db:/var/lib/postgresql/data
+      - db:/var/lib/postgresql
     {% if tt_rss_db_service_additional_labels %}
     labels:
       {{ tt_rss_db_service_additional_labels | indent(6) }}
@@ -109,7 +109,7 @@ services:
   # optional, makes weekly backups of your install
   {% if tt_rss_backups %}
   backups:
-    image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
+    image: {{ tt_rss_app_image }}:{{ tt_rss_version }}
     command: /opt/tt-rss/dcron.sh -f
     container_name: {{ docker_project_slug }}-backups
     restart: {{ docker_project_restart }}
@@ -137,7 +137,7 @@ services:
   {% else %}
   #backups:
   #  container_name: {{ docker_project_slug }}-backups
-  #  image: cthulhoo/ttrss-fpm-pgsql-static:{{ tt_rss_version }}
+  #  image: {{ tt_rss_app_image }}:{{ tt_rss_version }}
   #  command: /opt/tt-rss/dcron.sh -f
   #  restart: {{ docker_project_restart }}
   #  env_file:

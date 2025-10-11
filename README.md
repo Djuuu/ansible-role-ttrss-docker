@@ -2,7 +2,7 @@ Ansible Role: TT-RSS-docker
 ===========================
 
 Install Tiny Tiny RSS Docker Compose project.
-- https://tt-rss.org/
+- https://github.com/tt-rss/tt-rss
 
 Requirements
 ------------
@@ -36,12 +36,21 @@ tt_rss_traefik_middlewares:
 ```yaml
 # TT-RSS project variables
 
-# cthulhoo/ttrss-fpm-pgsql-static image version
+# TT-RSS app image source
+# tt_rss_app_image: supahgreg/tt-rss
+tt_rss_app_image: ghcr.io/tt-rss/tt-rss
+
+# TT-RSS nginx image source
+# tt_rss_nginx_image: supahgreg/tt-rss-web-nginx
+tt_rss_nginx_image: ghcr.io/tt-rss/tt-rss-web-nginx
+
+# TT-RSS app image version
 tt_rss_version: latest
-# postgres image version
-tt_rss_postgres_version: 15-alpine
-# cthulhoo/ttrss-web-nginx image version
+# TT-RSS nginx image version
 tt_rss_nginx_version: latest
+
+# postgres image version
+tt_rss_postgres_version: 18-alpine
 
 # Set admin user password to this value.
 # If not set, random password will be generated on startup, look for it in the 'app' container logs.
